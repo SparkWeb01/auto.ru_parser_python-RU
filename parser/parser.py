@@ -1,6 +1,6 @@
 import requests #импортируем пакет обеспечивающий работу с HTTP запросами
 from bs4 import BeautifulSoup #импортируем пакет для того чтобы распарсить дерево
-import csv #импортируем пакет для csv(excel) файлов 
+import csv #импортируем пакет для csv(excel) файлов
 
 #задаем константы
 URL = 'https://auto.ru/moskva/cars/gmc/all/'
@@ -14,6 +14,7 @@ FILE = 'cars.csv'
 #функция для получения web-страницы
 def get_html(url, params=None):
 	r = requests.get(url, headers=HEADERS, params=params)
+	r.encoding = 'utf8'
 	return r
 
 #функция для того чтобы парсить сразу мгого страниц
@@ -43,7 +44,7 @@ def get_content(html):
  
 #функция для создания и сохранения в файле данных
 def save_file(items, path):
-	with open(path, 'w', newline = '',encoding = "utf-8") as file:
+	with open(path, 'w+', newline = '',encoding='utf8') as file:
 		writer = csv.writer(file, delimiter = ';')
 		writer.writerow(['Марка','Cсылка','Цена','Город']) 
 		for item in items:
@@ -53,6 +54,7 @@ def save_file(items, path):
 def parse():
 	URL = input('Введите ссылку:  ')
 	html = get_html(URL)
+
 	if html.status_code==200:
 		cars=[]
 		pages_count = get_pages_count(html.text)
@@ -61,7 +63,6 @@ def parse():
 			print(f'Парсинг страницы {page} из {pages_count} ...')
 			html = get_html(URL, params={'page': page})
 			cars.extend(get_content(html.text))
-		
 		save_file(cars,FILE)
 		print('\n\n' + f'Получено {len(cars)} автомобилей')
 	else:
